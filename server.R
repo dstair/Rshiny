@@ -8,6 +8,7 @@ library(quantmod)
 library(xts)
 library(dygraphs)
 library(magrittr)
+library(PerformanceAnalytics)
 
 shinyServer(
   function(input, output) {
@@ -24,14 +25,32 @@ shinyServer(
                  to = input$dateRange[2],
                  auto.assign = FALSE)[,c(paste(input$stock2, ".Close", sep=""))]
     })
-    # Chart it!
+    stockCorr <- reactive({
+      cbind(diff(log(Cl(stockOne()))),diff(log(Cl(stockTwo()))))
+    })
+
+    # Chart stock prices!
     output$dygraph_price <- renderDygraph({
       dygraph(cbind(stockOne(),stockTwo()),
               ylab="Closing Price", 
               xlab="Date",
-              main=paste(input$stock1, "and", input$stock2, "Prices from ", input$dateRange[1], "to", input$dateRange[2])) %>%
-              dyAxis("x", drawGrid = FALSE) %>%
+              main=paste("Daily Closing Price of", input$stock1, "and", input$stock2, ",", input$dateRange[1], "to", input$dateRange[2])) %>%
+              dyAxis("x", drawGrid = TRUE) %>%
+              dyAxis("y", label = paste(input$stock1, "Closing Price")) %>%
+              dyAxis("y2", label = paste(input$stock2, "Closing Price"), independentTicks = TRUE) %>%
+              dySeries(paste(input$stock2, ".Close", sep=""), axis = "y2") %>%
               dyRangeSelector(strokeColor = "black", fillColor = "black")
+    })
+
+    #Chart correlation between stocks
+    output$dygraph_corr <- renderDygraph({
+      dygraph(stockCorr(),
+              ylab="Correlation", 
+              xlab="Date",
+              main=paste("Daily Correlation between", input$stock1, "and", input$stock2, ",", input$dateRange[1], "to", input$dateRange[2])) %>%
+        dyAxis("x", drawGrid = FALSE) %>%
+        dyAxis("y", label = paste("Correlation Between", input$stock1, input$stock2)) %>%
+        dyRangeSelector(strokeColor = "black", fillColor = "black")
     })
   }
 )

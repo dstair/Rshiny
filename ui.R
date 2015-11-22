@@ -30,6 +30,9 @@ shinyUI(pageWithSidebar(
          This is instantaneous as it does not download any additional data")
   ),
   mainPanel(
-      dygraphOutput("dygraph_price")
+      dygraphOutput("dygraph_price"),
+      br(),
+      br(),
+      dygraphOutput("dygraph_corr")
   )
 ))
