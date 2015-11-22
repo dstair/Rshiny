@@ -1,3 +1,7 @@
+# Program: Server file of Shiny project to pull stock tickers from Yahoo Finance
+# Author: Dan Stair
+# Date: November 2015
+
 library(shiny)
 library(plyr)
 library(quantmod)
@@ -5,31 +9,40 @@ library(xts)
 library(dygraphs)
 library(magrittr)
 
-getSymbols(c('MSFT', 'GOOG', 'AMZN', 'FB', 'GSPC'),src='yahoo')
-msft_open <- MSFT[,c("MSFT.Open", "MSFT.Close")]
-
 shinyServer(
   function(input, output) {
-    x <- reactive({
-      if (is.null(MSFT[input$dateRange[1]])) {
-       output$text4 <- renderText("Did you pick a start or end date with no trading?")
-      }
-      })
+    checkDates <- reactive({
+      validate(
+        need(!is.null(MSFT[as.character(input$dateRange[1]), which.i=TRUE]),
+             "Make sure to select ONLY days when the market is open!")
+      )
+    })
+
+    # Pull both stocks entered and subset the return date to only contain closing price
+    stockOne <- reactive({
+      getSymbols(input$stock1, src = "yahoo", 
+                 from = input$dateRange[1],
+                 to = input$dateRange[2],
+                 auto.assign = FALSE)[,c(paste(input$stock1, ".Close", sep=""))]
+    })
+    stockTwo <- reactive({
+      getSymbols(input$stock2, src = "yahoo", 
+                 from = input$dateRange[1],
+                 to = input$dateRange[2],
+                 auto.assign = FALSE)[,c(paste(input$stock2, ".Close", sep=""))]
+    })
     
-      output$text1 <- renderText({as.numeric(input$text1)+100  })
-      output$text2 <- renderText(as.character(input$dateRange[1]))
-      output$text3 <- renderText(MSFT[input$dateRange[1], which.i=TRUE])
+    # Display user input errors, if any
+    output$errors <- renderText({checkDates()})
 
-      # Chart it!
-      output$dygraph <- renderDygraph({
-        dygraph(msft_open[MSFT[as.character(input$dateRange[1]), which.i=TRUE]:MSFT[as.character(input$dateRange[2]), which.i=TRUE],],
-                ylab="Open", 
-                main="Microsoft Stock Prices") %>%
-                dyAxis("x", drawGrid = FALSE)
-      })
-      output$dateRangeText <- renderText({
-        paste("testing date range structure", input$dateRange[1], input$dateRange[2])
-      })
-
-   }
+    # Chart it!
+    output$dygraph_price <- renderDygraph({
+      dygraph(cbind(stockOne(),stockTwo()),
+              ylab="Closing Price", 
+              xlab="Date",
+              main=paste(input$stock1, "and", input$stock2, "Prices from ", input$dateRange[1], "to", input$dateRange[2])) %>%
+              dyAxis("x", drawGrid = FALSE) %>%
+              dyRangeSelector(strokeColor = "black", fillColor = "black")
+    })
+  }
 )
