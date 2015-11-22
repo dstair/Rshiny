@@ -21,18 +21,15 @@ shinyUI(pageWithSidebar(
                      min = "2008-01-02",
                      max = "2015-11-20"),
       br(),
-      h4("The fine print / detailed instructions:"),
+      strong("The fine print / detailed instructions:"),
       br(),
-      h4("Any ticker in Yahoo Finance should work, but this app was tested
+      p("1) Any ticker in Yahoo Finance should work, but this app was tested
          using MSFT, AMZN, AAPL, and GSPC (S&P 500)"),
-      br(),
-      h4("The date range you input will generate a call to download data from Yahoo Finance."),
-      br(),
-      h4("You can also zoom in on the chart interactively using the slider below the chart.
-         This is instantaneous as it does not generate any external calls")
+      p("2) The date range you input will immediately download the appropriate data from Yahoo Finance."),
+      p("3) You can also zoom in on the chart interactively using the slider below the chart.
+         This is instantaneous as it does not download any additional data")
   ),
   mainPanel(
-      dygraphOutput("dygraph_price"),
-      textOutput('errors')
+      dygraphOutput("dygraph_price")
   )
 ))
