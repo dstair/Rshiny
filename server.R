@@ -3,12 +3,11 @@
 # Date: November 2015
 
 library(shiny)
-library(plyr)
 library(quantmod)
 library(xts)
 library(dygraphs)
 library(magrittr)
-library(PerformanceAnalytics)
+library(plyr)
 
 shinyServer(
   function(input, output) {
@@ -25,31 +24,35 @@ shinyServer(
                  to = input$dateRange[2],
                  auto.assign = FALSE)[,c(paste(input$stock2, ".Close", sep=""))]
     })
-    stockCorr <- reactive({
-      cbind(diff(log(Cl(stockOne()))),diff(log(Cl(stockTwo()))))
+    weeklyReturns <- reactive({
+      weekly_returns <- cbind(weeklyReturn(stockOne()), weeklyReturn(stockTwo()))
+      names(weekly_returns)[names(weekly_returns)=="weekly.returns"] <- paste(input$stock1, "Returns")
+      names(weekly_returns)[names(weekly_returns)=="weekly.returns.1"] <- paste(input$stock2, "Returns")
+      return(weekly_returns)
     })
 
     # Chart stock prices!
     output$dygraph_price <- renderDygraph({
       dygraph(cbind(stockOne(),stockTwo()),
-              ylab="Closing Price", 
               xlab="Date",
-              main=paste("Daily Closing Price of", input$stock1, "and", input$stock2, ",", input$dateRange[1], "to", input$dateRange[2])) %>%
+              main=paste("Daily Closing Price of", input$stock1, "and", input$stock2, ",", input$dateRange[1], "to", input$dateRange[2]),
+              group = "stockcharts") %>%
               dyAxis("x", drawGrid = TRUE) %>%
-              dyAxis("y", label = paste(input$stock1, "Closing Price")) %>%
-              dyAxis("y2", label = paste(input$stock2, "Closing Price"), independentTicks = TRUE) %>%
+              dyAxis("y", label = paste(input$stock1, "Closing Price, USD")) %>%
+              dyAxis("y2", label = paste(input$stock2, "Closing Price, USD"), independentTicks = TRUE) %>%
               dySeries(paste(input$stock2, ".Close", sep=""), axis = "y2") %>%
               dyRangeSelector(strokeColor = "black", fillColor = "black")
     })
 
-    #Chart correlation between stocks
+    #Chart rates of return for each stock
     output$dygraph_corr <- renderDygraph({
-      dygraph(stockCorr(),
-              ylab="Correlation", 
+      dygraph(weeklyReturns(),
+              ylab="Weekly Return",
               xlab="Date",
-              main=paste("Daily Correlation between", input$stock1, "and", input$stock2, ",", input$dateRange[1], "to", input$dateRange[2])) %>%
-        dyAxis("x", drawGrid = FALSE) %>%
-        dyAxis("y", label = paste("Correlation Between", input$stock1, input$stock2)) %>%
+              main=paste("Weekly Returns for", input$stock1, "and", input$stock2, ",", input$dateRange[1], "to", input$dateRange[2]),
+              group = "stockcharts") %>%
+        dyAxis("x", drawGrid = TRUE) %>%
+        dyAxis("y", label = paste(input$stock1, "and", input$stock2, "Returns")) %>%
         dyRangeSelector(strokeColor = "black", fillColor = "black")
     })
   }
