@@ -10,8 +10,8 @@ shinyUI(pageWithSidebar(
   sidebarPanel(
       h3("Select stocks to compare!"),
       br(),
-      textInput(inputId="stock1", label = "Pick a first stock:", value = "AMZN"),
-      textInput(inputId="stock2", label = "Pick a second stock:", value = "MSFT"),
+      textInput(inputId="stock1", label = "Pick a first stock:", value = "JBLU"),
+      textInput(inputId="stock2", label = "Pick a second stock:", value = "KN"),
       
       dateRangeInput("dateRange", "Please input a date range between 1/2/2008 and 11/20/2015.",
                      start = "2015-01-02",
