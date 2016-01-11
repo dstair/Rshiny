@@ -9,6 +9,9 @@ library(dygraphs)
 library(magrittr)
 library(plyr)
 
+toDate <- function(x) as.Date(x, origin = "2007-01-03")
+ff_daily <- read.zoo('data/ff_daily.csv', header = TRUE, sep = ",", FUN = toDate) %>% as.xts()
+
 shinyServer(
   function(input, output) {
     # Pull both stocks entered and subset the return date to only contain closing price
