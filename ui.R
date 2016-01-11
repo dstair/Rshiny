@@ -19,20 +19,17 @@ shinyUI(pageWithSidebar(
                      min = "2008-01-02",
                      max = "2015-11-20"),
       br(),
-      strong("The fine print / detailed instructions:"),
+      strong("Explanation:"),
       br(),
-      p("1) Any ticker in Yahoo Finance should work, but this app was tested
-         using MSFT, AMZN, AAPL, and GSPC (S&P 500)"),
-      p("2) The date range you input will immediately download the appropriate data from Yahoo Finance."),
+      p("The Fama-French Three-Factor model is a model designed to predict whether a stock is overvalued or undervalued."),
+      p("Feel free to type in a stock ticker. Any ticker in Yahoo Finance should work, but this app was tested using MSFT, AMZN, AAPL, and GSPC (S&P 500)."),
       br(),
       strong("How to interpret the output:"),
-      p("1) You should see two charts, one with stock prices and the other with weekly rates of return"),
-      p("2) Note the colors of each stock are matched, so if MSFT is in blue in the top chart
-        it will be in blue on the bottom chart as well"),
-      p("3) You can zoom in on either chart interactively using the slider below the chart,
+      p("1) If there is a red area on the upper graph, that means the stock is overvalued. If the line is a solid green, that means that it is undervalued, and that the actual price "),
+      p("2) You can zoom in on either chart interactively using the slider below the chart,
          or by clicking on either chart and dragging and dragging horizontally to select
          a time frame. Either action is instantaneous as it does not download any additional data"),
-      p("4) Have fun!")
+      p("3) Have fun!")
 
   ),
   mainPanel(
